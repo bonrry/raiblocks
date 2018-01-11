@@ -303,6 +303,8 @@ endif (RAIBLOCKS_TEST)
 
 if (RAIBLOCKS_GUI)
 
+    find_package(Qt5 COMPONENTS Core Quick QuickControls2 REQUIRED)
+
     qt5_add_resources(RES resources.qrc)
 
 
@@ -310,10 +312,15 @@ if (RAIBLOCKS_GUI)
 		rai/qt/qt.cpp
 		rai/qt/qt.hpp)
 
-	add_executable (rai_wallet ${PLATFORM_GUI_TARGET_PROPERTIES}
+        add_executable (rai_wallet ${PLATFORM_GUI_TARGET_PROPERTIES}
 		${PLATFORM_WALLET_SOURCE}
-		rai/rai_wallet/entry.cpp
+                rai/rai_wallet/entry.cpp
 		${RES})
+
+        add_executable (rai_wallet2 ${PLATFORM_GUI_TARGET_PROPERTIES}
+                ${PLATFORM_WALLET_SOURCE}
+                rai/rai_wallet2/entry.cpp
+                ${RES})
 
 	add_executable (qt_test
 		rai/qt_test/entry.cpp
@@ -322,9 +329,9 @@ if (RAIBLOCKS_GUI)
 	add_executable (qt_system
 		rai/qt_system/entry.cpp)
 
-	set_target_properties (rai_wallet qt_test PROPERTIES LINK_FLAGS "${PLATFORM_LINK_FLAGS}")
+        set_target_properties (rai_wallet rai_wallet2 qt_test PROPERTIES LINK_FLAGS "${PLATFORM_LINK_FLAGS}")
 	
-	set_target_properties (qt_test qt rai_wallet qt_system PROPERTIES COMPILE_FLAGS "${PLATFORM_CXX_FLAGS} ${PLATFORM_COMPILE_FLAGS} -DQT_NO_KEYWORDS -DACTIVE_NETWORK=${ACTIVE_NETWORK} -DRAIBLOCKS_VERSION_MAJOR=${CPACK_PACKAGE_VERSION_MAJOR} -DRAIBLOCKS_VERSION_MINOR=${CPACK_PACKAGE_VERSION_MINOR} -DBOOST_ASIO_HAS_STD_ARRAY=1")
+        set_target_properties (qt_test qt rai_wallet rai_wallet2 qt_system PROPERTIES COMPILE_FLAGS "${PLATFORM_CXX_FLAGS} ${PLATFORM_COMPILE_FLAGS} -DQT_NO_KEYWORDS -DACTIVE_NETWORK=${ACTIVE_NETWORK} -DRAIBLOCKS_VERSION_MAJOR=${CPACK_PACKAGE_VERSION_MAJOR} -DRAIBLOCKS_VERSION_MINOR=${CPACK_PACKAGE_VERSION_MINOR} -DBOOST_ASIO_HAS_STD_ARRAY=1")
 	set_target_properties (qt qt_system PROPERTIES LINK_FLAGS "${PLATFORM_LINK_FLAGS}")
 endif (RAIBLOCKS_GUI)
 
@@ -362,7 +369,16 @@ if (RAIBLOCKS_GUI)
 
 	target_link_libraries (qt_system node secure lmdb rai_lib qt argon2 ${CRYPTOPP_LIBRARY} gtest libminiupnpc-static ${Boost_ATOMIC_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_DATE_TIME_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_LOG_SETUP_LIBRARY} ${Boost_THREAD_LIBRARY} Qt5::Core Qt5::Gui Qt5::Widgets ${QT_QTGUI_LIBRARY} ${PLATFORM_LIBS})
 
-	target_link_libraries (rai_wallet node secure lmdb rai_lib qt argon2 ${CRYPTOPP_LIBRARY} libminiupnpc-static ${Boost_ATOMIC_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_DATE_TIME_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_LOG_SETUP_LIBRARY} ${Boost_THREAD_LIBRARY} Qt5::Core Qt5::Gui Qt5::Widgets ${QT_QTGUI_LIBRARY} ${PLATFORM_LIBS} ${PLATFORM_WALLET_LIBS})
+        target_link_libraries (rai_wallet node secure lmdb rai_lib qt argon2 ${CRYPTOPP_LIBRARY} libminiupnpc-static
+            ${Boost_ATOMIC_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_DATE_TIME_LIBRARY} ${Boost_FILESYSTEM_LIBRARY}
+            ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_LOG_SETUP_LIBRARY} ${Boost_THREAD_LIBRARY}
+            Qt5::Core Qt5::Quick Qt5::QuickControls2 Qt5::Gui Qt5::Widgets ${QT_QTGUI_LIBRARY} ${PLATFORM_LIBS} ${PLATFORM_WALLET_LIBS})
+
+        target_link_libraries (rai_wallet2 node secure lmdb rai_lib qt argon2 ${CRYPTOPP_LIBRARY} libminiupnpc-static
+            ${Boost_ATOMIC_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_DATE_TIME_LIBRARY} ${Boost_FILESYSTEM_LIBRARY}
+            ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY} ${Boost_LOG_SETUP_LIBRARY} ${Boost_THREAD_LIBRARY}
+            Qt5::Core Qt5::Quick Qt5::QuickControls2 Qt5::Gui Qt5::Widgets ${QT_QTGUI_LIBRARY} ${PLATFORM_LIBS} ${PLATFORM_WALLET_LIBS})
+
 endif (RAIBLOCKS_GUI)
 
 target_link_libraries (rai_lib xxhash ed25519 blake2 ${CRYPTOPP_LIBRARY})
@@ -447,7 +463,7 @@ if (RAIBLOCKS_GUI)
 		install (FILES ${Qt5_bin_DIR}/Qt5WinExtras.dll DESTINATION .)
 		install (FILES ${Qt5WindowsPlugin} DESTINATION platforms)
 	else ()
-		install(TARGETS rai_wallet rai_node rai_lib
+                install(TARGETS rai_wallet rai_wallet2 rai_node rai_lib
 				RUNTIME DESTINATION bin
 				LIBRARY DESTINATION lib
 				ARCHIVE DESTINATION lib
